@@ -1,0 +1,22 @@
+workflows:
+  android-debug:
+    name: Android debug APK
+    instance_type: linux_x2
+    max_build_duration: 30
+    environment:
+      java: 17
+    scripts:
+      - name: Unpack project
+        script: unzip -q program-reminder.zip -d proj
+      - name: Build debug APK
+        script: |
+          cd proj
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          if ! command -v gradle >/dev/null 2>&1; then
+            curl -sSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
+            unzip -q /tmp/gradle.zip -d /tmp
+            export PATH="/tmp/gradle-8.7/bin:$PATH"
+          fi
+          gradle assembleDebug --no-daemon
+    artifacts:
+      - proj/app/build/outputs/apk/debug/*.apk
